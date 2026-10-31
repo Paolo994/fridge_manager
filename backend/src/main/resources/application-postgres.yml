@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/fridge}
+    username: ${DB_USER:fridge}
+    password: ${DB_PASSWORD:fridge}

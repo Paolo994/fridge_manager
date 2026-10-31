@@ -1,0 +1,6 @@
+# Fine riga LF nel repository e nelle copie di lavoro: evita problemi con Docker, nginx e script
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary

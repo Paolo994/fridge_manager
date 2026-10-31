@@ -1,0 +1,45 @@
+name: fridge-manager
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fridge
+      POSTGRES_USER: fridge
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-fridge}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fridge -d fridge"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      DB_URL: jdbc:postgresql://db:5432/fridge
+      DB_USER: fridge
+      DB_PASSWORD: ${DB_PASSWORD:-fridge}
+      JWT_SECRET: ${JWT_SECRET:?Imposta JWT_SECRET nel file .env}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-5-5}
+      CORS_ORIGINS: http://localhost:${APP_PORT:-3000}
+      TZ: Europe/Rome
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${APP_PORT:-3000}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db-data:
